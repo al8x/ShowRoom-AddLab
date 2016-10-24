@@ -23,23 +23,25 @@ void setup() {
   Serial.begin(115200);
   delay(10);
 
-  // prepare GPIO2
+// prepare GPIO
   pinMode(2, OUTPUT);
   digitalWrite(2, 0);
   
-  // Connect to WiFi network
-  Serial.println();
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-
+//Disconnect WiFi
   WiFi.disconnect();
   WiFi.softAPdisconnect();
   WiFi.mode(WIFI_OFF);
   delay(500);
 
+//Set WiFi in static IP mode
   WiFi.mode(WIFI_STA);
   WiFi.config(ip,gateway,subnet);
+
+//Connect to AP
+  Serial.println();
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
   WiFi.begin(ssid, password);
   
   while (WiFi.status() != WL_CONNECTED) {
@@ -49,52 +51,42 @@ void setup() {
   Serial.println("");
   Serial.println("WiFi connected");
   
-  // Start the server
+// Start the server
   server.begin();
   Serial.println("Server started");
 
-  // Print the IP address
+// Print the IP address
   Serial.println(WiFi.localIP());
 }
 
 void loop() {
-  // Check if a client has connected
+// Check if a client has connected
   WiFiClient client = server.available();
   if (!client) {
     return;
   }
   
-  // Wait until the client sends some data
+// Wait until the client sends some data
   Serial.println("new client");
   while(!client.available()){
     delay(1);
   }
   
-  // Read the first line of the request
+// Read the first line of the request
   String req = client.readStringUntil('\r');
   Serial.println(req);
   client.flush();
   
-  // Match the request
-  int val;
-  if (req.indexOf("/gpio/0") != -1)
-    val = 0;
-  else if (req.indexOf("/gpio/1") != -1)
-    val = 1;
-  else {
-    Serial.println("invalid request");
-    client.stop();
-    return;
-  }
-
-  // Set GPIO2 according to the request
-  digitalWrite(2, val);
+// Match the request and set GPIO
+  if (req.indexOf("/LED0") != -1) digitalWrite(2, LOW);
+  if (req.indexOf("/LED1") != -1) digitalWrite(2, HIGH);
   
   client.flush();
 
   // Prepare the response
-  String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nGPIO is now ";
-  s += (val)?"high":"low";
+  String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\n";
+  s += "<h1><a href='/LED0'>Switch off LED</a></h1>";
+  s += "<h1><a href='/LED1'>Switch on LED</a></h1>";
   s += "</html>\n";
 
   // Send the response to the client
