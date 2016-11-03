@@ -12,7 +12,7 @@ void setup() {
   
   for (int pinLed=3;pinLed<20;pinLed++){
        pinMode(pinLed,OUTPUT);
-       digitalWrite(pinLed,LOW);
+       digitalWrite(pinLed,HIGH);
       }
  
 
@@ -35,7 +35,7 @@ void loop() {
     numeroLed = (ledDizaine.toInt())*10 + (ledUnite.toInt());
     numeroLed=numeroLed-1; //car on part de la sortie led 2 cablé sur le 3
 
-    etat = (String(action[9])).toInt();
+    etat = !(String(action[9])).toInt(); 
 
     digitalWrite(numeroLed,etat);
     
@@ -45,7 +45,7 @@ void loop() {
   
   else if(action.length()==11){ //Pour les actions /leds/all/1
     
-    etat = (String(action[10])).toInt();
+    etat = !(String(action[10])).toInt();
     for (int i=2;i<20;i++){
       numeroLed=i-1; ///car on part de la sortie led 2 cablé sur le 3
       digitalWrite(numeroLed,etat);
